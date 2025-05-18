@@ -1,0 +1,49 @@
+body {
+    background-color: #f0f0f0;
+    font-family: 'Helvetica Neue', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.music-player {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    width: 300px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.album-cover {
+    width: 100%;
+    border-radius: 15px;
+}
+
+.song-title {
+    margin: 15px 0 5px;
+    font-size: 1.2em;
+}
+
+.artist-name {
+    margin: 0 0 20px;
+    color: #666;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+}
+
+.controls button {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+#progress {
+    width: 100%;
+}

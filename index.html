@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chemm´s Crew Records</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #000;
+            color: #fff;
+            padding-bottom: 90px;
+            /* espacio para barra inferior fija */
+        }
+        
+        .center {
+            text-align: center;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 4rem;
+            border-bottom: 1px solid #333;
+        }
+        
+        header h1 {
+            font-size: 1.5rem;
+        }
+        
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 4rem;
+            color: #ffffff;
+            /* un verde tipo Apple Music */
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        nav a {
+            color: #aaa;
+            margin-left: 2rem;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        /* Botón lupa */
+        
+        #searchToggle {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color 0.3s;
+        }
+        
+        #searchToggle:hover {
+            color: #fff;
+        }
+        /* Contenedor input oculto y con transición */
+        
+        #searchContainer {
+            position: absolute;
+            right: 40px;
+            /* justo a la izquierda de la lupa */
+            top: 50%;
+            transform: translateY(-50%) scaleX(0);
+            transform-origin: right center;
+            transition: transform 0.3s ease;
+            background-color: #222;
+            border-radius: 20px;
+            overflow: hidden;
+            width: 0;
+            max-width: 300px;
+        }
+        /* Cuando está activo */
+        
+        #searchContainer.active {
+            width: 280px;
+            transform: translateY(-50%) scaleX(1);
+        }
+        /* Input estilo minimalista */
+        
+        #searchInput {
+            width: 100%;
+            padding: 0.4rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            color: #fff;
+            background: transparent;
+        }
+        /* Responsive: en pantallas pequeñas, buscador ocupa más ancho y posición ajustada */
+        
+        @media (max-width: 480px) {
+            #searchContainer.active {
+                width: 180px;
+                right: 35px;
+            }
+        }
+        
+        nav a:hover {
+            color: #fff;
+        }
+        
+        .autografo {
+            font-family: 'Pacifico', cursive;
+            font-size: 3rem;
+            color: #ffffff;
+        }
+        
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 2rem 4rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 0 4rem 4rem;
+        }
+        
+        .card {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #111;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .card:hover {
+            transform: scale(1.03);
+        }
+        
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            color: black;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2;
+        }
+        
+        .card:hover .play-button {
+            opacity: 1;
+        }
+        
+        footer {
+            border-top: 1px solid #333;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .footer-icons a {
+            color: #aaa;
+            margin: 0 1rem;
+            font-size: 2rem;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-icons a:hover {
+            color: #fff;
+        }
+        /* Barra fija reproductor */
+        
+        .player-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: #111;
+            border-top: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
+        
+        .player-bar button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .player-bar button:hover {
+            color: #1db954;
+            /* verde estilo Apple Music/Spotify */
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 150px;
+        }
+        
+        .volume-control input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        .volume-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #1db954;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            margin-top: -5px;
+        }
+        
+        .volume-control input[type="range"]::-webkit-slider-runnable-track {
+            height: 5px;
+            background: #555;
+            border-radius: 3px;
+        }
+        /* Firefox */
+        
+        .volume-control input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            background: #1db954;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+        
+        .volume-control input[type="range"]::-moz-range-track {
+            height: 5px;
+            background: #555;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Chemm´s Crew</h1>
+        <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
+        <nav>
+            <!-- <a href="#">Escuchar ahora</a>
+            <a href="#">Explorar</a>
+            <a href="#">Radio</a>
+            <a href="#">Biblioteca</a> -->
+        </nav>
+        <div class="search-wrapper">
+            <button id="searchToggle" aria-label="Buscar">
+    <i class="bi bi-search"></i>
+  </button>
+            <div id="searchContainer" aria-hidden="true">
+                <input type="text" id="searchInput" placeholder="Buscar canción..." />
+            </div>
+        </div>
+    </header>
+
+    <div class="section-title center">Musica</div>
+    <section class="grid">
+        <div class="card" onclick="selectTrack(0)" data-title="el rap de pollos gasca">
+            <img src="./img/Chemm´s Crew.png" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-0" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)" data-title="el rap de valtierrilla">
+            <img src="./img/artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)" data-title="rea ramirez">
+            <img src="./img/artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)" data-title="conalep salamanca">
+            <img src="./img/artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)">
+            <img src="./img/artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)">
+            <img src="./img/artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)">
+            <img src="./img/artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)">
+            <img src="./img/artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)">
+            <img src="./img/artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)">
+            <img src="artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+
+        <div class="card" onclick="selectTrack(1)">
+            <img src="artworks-kZnzSTJldrUTsHhs-SUOAlQ-t500x500.jpg" alt="Cover">
+            <div class="play-button"><i class="bi bi-play-fill"></i></div>
+            <audio id="audio-1" src="./music/Pechas - EL RAP DE POLLOS GASCA ft. ChatGTP.mp3"></audio>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-icons">
+            <a href="https://music.apple.com" target="_blank"><i class="bi bi-apple"></i></a>
+            <a href="https://spotify.com" target="_blank"><i class="bi bi-spotify"></i></a>
+            <a href="https://soundcloud.com/chemms-crew" target="_blank"><i class="bi bi-soundwave"></i></a>
+            <a href="https://www.youtube.com/@ChemmsCrew" target="_blank"><i class="bi bi-youtube"></i></a>
+        </div>
+    </footer>
+
+    <div class="player-bar">
+        <button id="prevBtn" title="Anterior"><i class="bi bi-skip-start-fill"></i></button>
+        <button id="playPauseBtn" title="Play/Pausa"><i class="bi bi-play-fill"></i></button>
+        <button id="nextBtn" title="Siguiente"><i class="bi bi-skip-end-fill"></i></button>
+
+        <div class="volume-control">
+            <i class="bi bi-volume-down-fill"></i>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" />
+            <i class="bi bi-volume-up-fill"></i>
+        </div>
+    </div>
+
+    <script>
+        const audios = [
+            document.getElementById('audio-0'),
+            document.getElementById('audio-1'),
+            // agrega más si tienes más pistas
+        ];
+
+        let currentIndex = null;
+
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        function selectTrack(index) {
+            if (currentIndex !== null && currentIndex !== index) {
+                audios[currentIndex].pause();
+                audios[currentIndex].currentTime = 0;
+            }
+            currentIndex = index;
+            playAudio();
+        }
+
+        function playAudio() {
+            const audio = audios[currentIndex];
+            if (!audio) return;
+
+            if (audio.paused) {
+                audio.volume = volumeSlider.value;
+                audio.play();
+                playPauseBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+            } else {
+                audio.pause();
+                playPauseBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+            }
+        }
+
+        playPauseBtn.addEventListener('click', () => {
+            if (currentIndex === null) return;
+            playAudio();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex === null) return;
+            audios[currentIndex].pause();
+            audios[currentIndex].currentTime = 0;
+            currentIndex = (currentIndex - 1 + audios.length) % audios.length;
+            audios[currentIndex].volume = volumeSlider.value;
+            audios[currentIndex].play();
+            playPauseBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex === null) return;
+            audios[currentIndex].pause();
+            audios[currentIndex].currentTime = 0;
+            currentIndex = (currentIndex + 1) % audios.length;
+            audios[currentIndex].volume = volumeSlider.value;
+            audios[currentIndex].play();
+            playPauseBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+        });
+
+        volumeSlider.addEventListener('input', () => {
+            if (currentIndex !== null) {
+                audios[currentIndex].volume = volumeSlider.value;
+            }
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const filter = this.value.toLowerCase();
+            const cards = document.querySelectorAll('.grid .card');
+
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title').toLowerCase();
+                if (title.includes(filter)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        const toggleBtn = document.getElementById('searchToggle');
+        const searchContainer = document.getElementById('searchContainer');
+        const searchInput = document.getElementById('searchInput');
+
+        toggleBtn.addEventListener('click', () => {
+            const isActive = searchContainer.classList.contains('active');
+            if (!isActive) {
+                searchContainer.classList.add('active');
+                searchContainer.setAttribute('aria-hidden', 'false');
+                searchInput.focus();
+            } else {
+                searchContainer.classList.remove('active');
+                searchContainer.setAttribute('aria-hidden', 'true');
+                searchInput.value = '';
+            }
+        });
+
+        // Opcional: cerrar buscador si clic fuera de él
+        document.addEventListener('click', (e) => {
+            if (!searchContainer.contains(e.target) && !toggleBtn.contains(e.target)) {
+                if (searchContainer.classList.contains('active')) {
+                    searchContainer.classList.remove('active');
+                    searchContainer.setAttribute('aria-hidden', 'true');
+                    searchInput.value = '';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
